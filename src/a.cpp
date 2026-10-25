@@ -11,6 +11,8 @@ struct  Patical
     sf::RectangleShape shape;
     sf::Vector2f velocity;
     bool alive;
+    float age;
+    float lifetime;
     /* data */
 };
 sf::Vector2f startPos(400.f, 500.f);
@@ -40,6 +42,10 @@ int main()
         float vx = cos(anglered)*basevelocity;
         float vy = sin(anglered)*basevelocity;
         paricales[i].velocity = sf::Vector2f(vx,vy);
+        float liferand = static_cast<float>(rand()%5+1.f);
+        paricales[i].lifetime = liferand;
+        paricales[i].age = 0;
+
     }
     sf::Clock clock;
     window.setFramerateLimit(60);
@@ -59,22 +65,38 @@ int main()
         float datatime = clock.restart().asSeconds();
         
         emittime +=datatime;
+        
         while(emittime>=testtime)
         {
             emittime -=testtime;
             for (int i = 0; i < 100; ++i)
             {
-                if (paricales[i].alive) continue;   
+                if (paricales[i].alive)
+                    continue; 
                 paricales[i].alive = true;
-                break;                               
+                paricales[i].age = 0.f;
+                break;
+
+                                            
             }
-                    
+            
 
         }
         for(int i=0;i<particalCount;++i)
-        {
+        {   
+            if (paricales[i].age >= paricales[i].lifetime)   // 寿终 → 回收
+            {
+                paricales[i].alive = false;
+                paricales[i].shape.setPosition(startPos);
+                continue;
+            }
+
             if(paricales[i].alive)
+            {
                 paricales[i].shape.move(paricales[i].velocity*datatime);
+                paricales[i].age+=datatime;
+            }
+                
             if(paricales[i].shape.getPosition().x<0||paricales[i].shape.getPosition().x>window.getSize().x)
             {
                 paricales[i].velocity.x = -paricales[i].velocity.x;
@@ -90,7 +112,7 @@ int main()
         
         for(int i=0;i<particalCount;i++)
         {
-            if(paricales[i].alive)
+            if(paricales[i].alive||paricales[i].age<paricales[i].lifetime)
                 window.draw(paricales[i].shape);
         }
         
