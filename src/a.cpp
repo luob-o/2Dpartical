@@ -8,11 +8,15 @@ using namespace std;
 
 struct  Patical
 {
-    sf::CircleShape shape;
+    sf::RectangleShape shape;
     sf::Vector2f velocity;
+    bool alive;
     /* data */
 };
-
+sf::Vector2f startPos(400.f, 500.f);
+float basevelocity = 100.0;
+float baseangle = -90.0;
+const float pi = 3.14159265358979f;
 int main()
 {
     srand(static_cast<unsigned int>(time(nullptr)));
@@ -25,13 +29,22 @@ int main()
     );
     for(int i=0;i<particalCount;i++)
     {
-        paricales[i].shape.setRadius(5);
+        paricales[i].shape.setSize(sf::Vector2f(5,6));
         paricales[i].shape.setFillColor(sf::Color::Green);
-        paricales[i].shape.setPosition(rand()% window.getSize().x,rand()% window.getSize().y);
-        paricales[i].velocity = sf::Vector2f((rand()%200)-100,(rand()-200)%100);
+        //paricales[i].shape.setPosition(rand()% window.getSize().x,rand()% window.getSize().y);
+        paricales[i].shape.setPosition(startPos);
+        paricales[i].alive = false;
+        float offserdeg = static_cast<float>((rand()%96)-45);
+        float angle = baseangle+offserdeg;
+        float anglered = angle*pi/180.0;
+        float vx = cos(anglered)*basevelocity;
+        float vy = sin(anglered)*basevelocity;
+        paricales[i].velocity = sf::Vector2f(vx,vy);
     }
     sf::Clock clock;
     window.setFramerateLimit(60);
+    float emittime = 0.f;
+    float testtime = 0.015f;
     while(window.isOpen())
     {
         Event event;
@@ -44,9 +57,24 @@ int main()
             }
         }
         float datatime = clock.restart().asSeconds();
+        
+        emittime +=datatime;
+        while(emittime>=testtime)
+        {
+            emittime -=testtime;
+            for (int i = 0; i < 100; ++i)
+            {
+                if (paricales[i].alive) continue;   
+                paricales[i].alive = true;
+                break;                               
+            }
+                    
+
+        }
         for(int i=0;i<particalCount;++i)
         {
-            paricales[i].shape.move(paricales[i].velocity*datatime);
+            if(paricales[i].alive)
+                paricales[i].shape.move(paricales[i].velocity*datatime);
             if(paricales[i].shape.getPosition().x<0||paricales[i].shape.getPosition().x>window.getSize().x)
             {
                 paricales[i].velocity.x = -paricales[i].velocity.x;
@@ -58,10 +86,14 @@ int main()
         }
         
         window.clear();
+        
+        
         for(int i=0;i<particalCount;i++)
         {
-            window.draw(paricales[i].shape);
+            if(paricales[i].alive)
+                window.draw(paricales[i].shape);
         }
+        
         window.display();
         
     }
