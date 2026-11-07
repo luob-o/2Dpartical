@@ -26,6 +26,15 @@ add_executable(a
     src/a.cpp
 )
 
+add_executable(kangwei
+    src/kangwei.cpp
+)
+target_link_libraries(kangwei PRIVATE sfml-graphics)
+add_executable(testt src/testt.cpp)
+target_link_libraries(testt PRIVATE sfml-graphics)
+if(MSVC)
+    target_compile_options(kangwei PRIVATE /utf-8)
+endif()
 target_link_libraries(main PRIVATE
     sfml-graphics
 )
